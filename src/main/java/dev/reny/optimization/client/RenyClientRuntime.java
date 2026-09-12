@@ -65,22 +65,31 @@ public final class RenyClientRuntime {
                     minecraft.gameSettings.limitFramerate)
                 .extra("fps_cap_semantics", isUncapped(minecraft.gameSettings.limitFramerate) ? "uncapped" : "capped");
         }
-        World world = minecraft.theWorld;
-        if (world == null) {
+        World clientWorld = minecraft.theWorld;
+        if (clientWorld == null) {
             return builder.world("unknown", "no-world", "unknown", "unknown")
                 .build();
         }
-        WorldInfo info = world.getWorldInfo();
+        World metadataWorld = clientWorld;
+        if (minecraft.getIntegratedServer() != null && clientWorld.provider != null) {
+            World integratedWorld = minecraft.getIntegratedServer()
+                .worldServerForDimension(clientWorld.provider.dimensionId);
+            if (integratedWorld != null) {
+                metadataWorld = integratedWorld;
+                builder.extra("world_metadata_source", "integrated-server");
+            }
+        }
+        WorldInfo info = metadataWorld.getWorldInfo();
         String worldName = info == null ? "unknown" : info.getWorldName();
-        String weather = BenchmarkContexts.weather(world);
+        String weather = BenchmarkContexts.weather(metadataWorld);
         String route = playerRoute(minecraft);
         builder
             .world(
-                String.valueOf(world.getSeed()),
-                worldName + ",dimension=" + world.provider.dimensionId,
+                String.valueOf(metadataWorld.getSeed()),
+                worldName + ",dimension=" + metadataWorld.provider.dimensionId,
                 route,
                 weather)
-            .extra("world_time_ticks", String.valueOf(world.getWorldTime()))
+            .extra("world_time_ticks", String.valueOf(metadataWorld.getWorldTime()))
             .extra("weather", weather)
             .extra("primary_run_settings_valid", primarySettingsValid(minecraft));
         return builder.build();
