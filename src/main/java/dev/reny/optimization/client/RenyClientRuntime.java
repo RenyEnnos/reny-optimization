@@ -3,6 +3,7 @@ package dev.reny.optimization.client;
 import java.util.Locale;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
@@ -62,7 +63,7 @@ public final class RenyClientRuntime {
                     minecraft.gameSettings.renderDistanceChunks,
                     minecraft.gameSettings.enableVsync,
                     minecraft.gameSettings.limitFramerate)
-                .extra("fps_cap_semantics", minecraft.gameSettings.limitFramerate == 0 ? "uncapped" : "capped");
+                .extra("fps_cap_semantics", isUncapped(minecraft.gameSettings.limitFramerate) ? "uncapped" : "capped");
         }
         World world = minecraft.theWorld;
         if (world == null) {
@@ -103,6 +104,12 @@ public final class RenyClientRuntime {
         if (minecraft.gameSettings == null) {
             return "unknown";
         }
-        return !minecraft.gameSettings.enableVsync && minecraft.gameSettings.limitFramerate == 0 ? "true" : "false";
+        return !minecraft.gameSettings.enableVsync && isUncapped(minecraft.gameSettings.limitFramerate) ? "true"
+            : "false";
+    }
+
+    /** Minecraft 1.7.10 uses the slider maximum (260) as its uncapped sentinel. */
+    private static boolean isUncapped(int limitFramerate) {
+        return limitFramerate >= (int) GameSettings.Options.FRAMERATE_LIMIT.getValueMax();
     }
 }
