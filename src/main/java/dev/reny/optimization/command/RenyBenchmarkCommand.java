@@ -41,7 +41,9 @@ public final class RenyBenchmarkCommand extends CommandBase {
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 2;
+        // The client-side control surface must work in a clean singleplayer profile;
+        // starting a fixed benchmark does not grant any gameplay or server mutation.
+        return 0;
     }
 
     @Override
