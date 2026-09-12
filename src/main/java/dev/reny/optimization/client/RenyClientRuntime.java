@@ -1,5 +1,9 @@
 package dev.reny.optimization.client;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Locale;
 
 import net.minecraft.client.Minecraft;
@@ -46,7 +50,7 @@ public final class RenyClientRuntime {
         Minecraft minecraft = Minecraft.getMinecraft();
         BenchmarkContext.Builder builder = BenchmarkContexts.builderFor(scenario)
             .extra("context_source", "client-command")
-            .extra("shader_metadata_source", "reny.benchmark.shader.* system properties")
+            .extra("shader_metadata_source", "optionsshaders.txt with reny.benchmark.shader.* override")
             .configHash(
                 BenchmarkContexts.property(
                     "reny.benchmark.config.hash",
@@ -65,6 +69,14 @@ public final class RenyClientRuntime {
                     minecraft.gameSettings.limitFramerate)
                 .extra("fps_cap_semantics", isUncapped(minecraft.gameSettings.limitFramerate) ? "uncapped" : "capped");
         }
+        String shaderPack = discoverShaderPack(minecraft);
+        String shaderName = BenchmarkContexts.property("reny.benchmark.shader.name", shaderPack);
+        String shaderVersion = BenchmarkContexts
+            .property("reny.benchmark.shader.version", isNoShader(shaderPack) ? "none" : "unknown");
+        String shaderPreset = BenchmarkContexts
+            .property("reny.benchmark.shader.preset", isNoShader(shaderPack) ? "none" : "unknown");
+        builder.shader(shaderName, shaderVersion, shaderPreset)
+            .extra("shader_pack_configured", String.valueOf(!isNoShader(shaderPack)));
         World clientWorld = minecraft.theWorld;
         if (clientWorld == null) {
             return builder.world("unknown", "no-world", "unknown", "unknown")
@@ -93,6 +105,44 @@ public final class RenyClientRuntime {
             .extra("weather", weather)
             .extra("primary_run_settings_valid", primarySettingsValid(minecraft));
         return builder.build();
+    }
+
+    private static String discoverShaderPack(Minecraft minecraft) {
+        if (minecraft == null || minecraft.mcDataDir == null) {
+            return "none";
+        }
+        File options = new File(minecraft.mcDataDir, "optionsshaders.txt");
+        if (!options.isFile()) {
+            return "none";
+        }
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(options));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("shaderPack=")) {
+                    String value = line.substring("shaderPack=".length())
+                        .trim();
+                    return value.isEmpty() ? "none" : value;
+                }
+            }
+        } catch (IOException ignored) {
+            // Metadata discovery is best effort; the exported value remains explicit.
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ignored) {
+                    // Best effort close only.
+                }
+            }
+        }
+        return "none";
+    }
+
+    private static boolean isNoShader(String value) {
+        return value == null || value.trim()
+            .isEmpty() || "none".equalsIgnoreCase(value.trim());
     }
 
     private static String playerRoute(Minecraft minecraft) {
