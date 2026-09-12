@@ -136,6 +136,22 @@ public final class BenchmarkSession {
         return scenario;
     }
 
+    public BenchmarkEnvironment getEnvironment() {
+        return environment;
+    }
+
+    public long getCurrentPhaseElapsedMillis() {
+        long start;
+        if (state == State.WARMUP) {
+            start = warmupStartNanos;
+        } else if (state == State.MEASURING) {
+            start = measurementStartNanos;
+        } else {
+            return 0L;
+        }
+        return Math.max(0L, (clock.nanoTime() - start) / 1_000_000L);
+    }
+
     private long elapsedNanos(long startNanos) {
         return Math.max(0L, clock.nanoTime() - startNanos);
     }

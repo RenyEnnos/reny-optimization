@@ -34,7 +34,7 @@ public final class InternalProfiler {
     private volatile File automaticExportDirectory;
     private volatile boolean shutdownHookInstalled;
 
-    InternalProfiler(int frameCapacity, int tickCapacity) {
+    public InternalProfiler(int frameCapacity, int tickCapacity) {
         frames = new DurationSeries(frameCapacity);
         ticks = new DurationSeries(tickCapacity);
         for (int i = 0; i < frameThresholdCounts.length; i++) {
