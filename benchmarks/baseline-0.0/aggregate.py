@@ -330,6 +330,22 @@ def scan_candidates(results_root: Path, commit_sha: str) -> List[Dict[str, Any]]
     return events
 
 
+def resolve_result_dir(raw_value: str, results_root: Path) -> Path:
+    """Resolve event paths written relative to the benchmark instance.
+
+    Campaign events use paths such as ``benchmarks/results/...`` because the
+    runner executes in the CurseForge instance.  The aggregator is commonly
+    invoked from the development checkout, so resolving those paths against
+    the current working directory silently rejects otherwise valid exports.
+    """
+    value = Path(raw_value)
+    if value.is_absolute():
+        return value
+    if len(value.parts) >= 2 and value.parts[:2] == ("benchmarks", "results"):
+        return results_root.parent.parent / value
+    return Path.cwd() / value
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results-root", type=Path, default=Path("benchmarks/results"))
@@ -350,21 +366,24 @@ def main() -> int:
         parser.error("provide --events or --scan")
 
     accepted: List[Dict[str, Any]] = []
-    seen_cells: Dict[Tuple[str, str], str] = {}
+    seen_run_ids: set[str] = set()
+    accepted_by_cell: Dict[Tuple[str, str], int] = {}
     for event in events:
-        result_dir = Path(str(event.get("result_dir", "")))
-        if not result_dir.is_absolute():
-            result_dir = Path.cwd() / result_dir
+        result_dir = resolve_result_dir(str(event.get("result_dir", "")), results_root)
         run, error = validate_export(event, result_dir, args.commit)
         if error:
             reject(rejections, event, error)
             continue
         assert run is not None
         key = (run["configuration"], run["scenario"])
-        if key in seen_cells:
-            reject(rejections, event, f"duplicate valid run for cell; already accepted {seen_cells[key]}")
+        if run["run_id"] in seen_run_ids:
+            reject(rejections, event, "duplicate valid run_id")
             continue
-        seen_cells[key] = run["run_id"]
+        if accepted_by_cell.get(key, 0) >= RUNS_PER_CELL:
+            reject(rejections, event, f"more than {RUNS_PER_CELL} valid runs for cell")
+            continue
+        seen_run_ids.add(run["run_id"])
+        accepted_by_cell[key] = accepted_by_cell.get(key, 0) + 1
         accepted.append(run)
 
     cells = [
