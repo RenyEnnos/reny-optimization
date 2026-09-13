@@ -50,11 +50,14 @@ missing-texture warnings are retained as evidence.
 ## Operator protocol
 
 The runtime command is `/reny benchmark start <BENCH-ID>`. The controller logs
-CREATED → WARMUP → MEASURING → COMPLETE and prints the export directory. A
-manual-interface runner stages the disposable profile, then waits for a human
-to launch the profile and enter the designated world. It does not select worlds
-or navigate Minecraft menus. Once world entry is observed, it sends the
-benchmark command and monitors the state transitions.
+CREATED → WARMUP → MEASURING → COMPLETE and prints the export directory. The
+campaign runner stages the disposable profile, launches it through the
+CurseForge profile, selects the designated snapshot, and observes the
+world-entry log before sending the benchmark command. A manual-interface mode
+exists as a fallback, but the final 80-run campaign used the automated path.
+The X11 helper activates Minecraft before typing the complete command, uses a
+held key/mouse press where the 1.7.10 GUI samples button state, and restores the
+previous window after injection. It does not send Escape after Return.
 
 The pilot is a separate gate. It must prove output identity, duration bounds,
 sample counts, sane IDs, populated percentiles, JVM/GC metadata, unique output,
@@ -68,3 +71,11 @@ durations, files, and CSV sample counts. Cell frame/tick distributions are
 computed over concatenated measurement samples; run-level median/min/max/mean/
 standard deviation are retained for the exported percentile and runtime
 metrics. P99.9 is emitted when at least 1,000 samples support the tail.
+
+## Final campaign validation
+
+The final event log contains 80 accepted terminal `VALID` formal runs at commit
+`30d88b554addd4a610d6fe1efd319bda4b677635`, with five runs in every one of the
+16 cells. The final aggregate was regenerated with strict cell-coverage
+validation. Rejected attempts remain in `rejections.json`; they are not
+silently reused as formal measurements.

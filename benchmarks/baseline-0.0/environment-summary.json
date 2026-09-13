@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "status": "PARTIAL",
-  "formal_valid_runs": 1,
+  "status": "COMPLETE",
+  "formal_valid_runs": 80,
   "formal_expected_runs": 80,
   "formal_runs_per_cell": 5,
   "repo": {
@@ -39,6 +39,8 @@
   "heavy_workload": {
     "source_instance": "Forja Industrial 1710",
     "source_git_commit": "c8e06abab9515473c1d54dbdebc3b9ae890b4686",
+    "source_checkout_current_after_snapshot": "2dfadddcbe99e31a56eba8c57577eae745fe913a",
+    "source_checkout_current_status_after_snapshot": "clean; not used as a launch target",
     "world": "New World",
     "seed": "-7121280191151763024",
     "isolated_config_hash": "sha256:27b1184c8c2671ccb6b855394a540255b878c498b38019e89d3b8bfd71d2db0b",
@@ -46,6 +48,14 @@
       "filename": "Sildur's Enhanced Default v1.19 Fast.zip",
       "sha256": "65969f5c7a381dfdd924cd1a07cfd5cfd9bf184a504ddd678abc147ccb314549"
     }
+  },
+  "campaign": {
+    "accepted_formal_runs": 80,
+    "complete_cells": 16,
+    "runs_per_cell": 5,
+    "rejected_attempts_or_exports": 29,
+    "pilot_excluded_from_formal_count": true,
+    "optimization_patches": "none"
   },
   "pilot": {
     "scenario": "BENCH-01",
@@ -64,6 +74,6 @@
   "evidence_policy": {
     "raw_artifacts": "local benchmark-work/raw and benchmarks/results; not committed",
     "formal_source": "terminal VALID campaign events filtered by exact commit",
-    "ranking": "deferred until the formal matrix is complete"
+    "ranking": "data-derived from aggregate.json; exact subsystem and CPU/GPU attribution remain bounded by available instrumentation"
   }
 }
