@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 import net.minecraft.client.Minecraft;
@@ -76,7 +77,9 @@ public final class RenyClientRuntime {
         String shaderPreset = BenchmarkContexts
             .property("reny.benchmark.shader.preset", isNoShader(shaderPack) ? "none" : "unknown");
         builder.shader(shaderName, shaderVersion, shaderPreset)
-            .extra("shader_pack_configured", String.valueOf(!isNoShader(shaderPack)));
+            .extra("shader_pack_configured", String.valueOf(!isNoShader(shaderPack)))
+            .extra("optifine_loaded", String.valueOf(isOptiFineLoaded()))
+            .extra("optifine_version", discoverOptiFineVersion());
         World clientWorld = minecraft.theWorld;
         if (clientWorld == null) {
             return builder.world("unknown", "no-world", "unknown", "unknown")
@@ -138,6 +141,26 @@ public final class RenyClientRuntime {
             }
         }
         return "none";
+    }
+
+    private static boolean isOptiFineLoaded() {
+        try {
+            Class.forName("Config", false, RenyClientRuntime.class.getClassLoader());
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    private static String discoverOptiFineVersion() {
+        try {
+            Class<?> config = Class.forName("Config", false, RenyClientRuntime.class.getClassLoader());
+            Method method = config.getMethod("getVersion");
+            Object value = method.invoke(null);
+            return value == null ? "unknown" : String.valueOf(value);
+        } catch (Throwable ignored) {
+            return "none";
+        }
     }
 
     private static boolean isNoShader(String value) {

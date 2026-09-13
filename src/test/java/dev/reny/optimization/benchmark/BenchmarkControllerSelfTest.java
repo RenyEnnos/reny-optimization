@@ -11,6 +11,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
 
+import dev.reny.optimization.command.RenyBenchmarkCommand;
 import dev.reny.optimization.profiler.InternalProfiler;
 
 /** Dependency-free verification that the runtime controller advances and exports automatically. */
@@ -26,6 +27,7 @@ public final class BenchmarkControllerSelfTest {
         testAutomaticTransitionsAndExport();
         testBusyAndUnknownCommitGuards();
         testCancel();
+        testCommandPermissionSurfaces();
         System.out.println("BenchmarkControllerSelfTest: " + passed + " tests passed");
     }
 
@@ -105,6 +107,28 @@ public final class BenchmarkControllerSelfTest {
             controller.statusLine()
                 .contains("FAILED"),
             "cancel is visible in status");
+        pass();
+    }
+
+    private void testCommandPermissionSurfaces() throws Exception {
+        BenchmarkController controller = new BenchmarkController(
+            new InternalProfiler(8, 8),
+            Files.createTempDirectory("reny-controller-permission")
+                .toFile(),
+            Files.createTempDirectory("reny-controller-permission-results")
+                .toFile(),
+            new ManualClock(4_000L));
+        BenchmarkContextProvider provider = new BenchmarkContextProvider() {
+
+            @Override
+            public BenchmarkContext create(ICommandSender sender, BenchmarkScenario scenario) {
+                return context();
+            }
+        };
+        RenyBenchmarkCommand clientCommand = new RenyBenchmarkCommand(controller, provider);
+        RenyBenchmarkCommand serverCommand = new RenyBenchmarkCommand(controller, provider, 2);
+        check(clientCommand.getRequiredPermissionLevel() == 0, "client command remains available in singleplayer");
+        check(serverCommand.getRequiredPermissionLevel() == 2, "server command requires operator permission");
         pass();
     }
 

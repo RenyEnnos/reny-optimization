@@ -23,6 +23,8 @@ SCENARIOS = ("BENCH-01", "BENCH-02", "BENCH-03", "BENCH-06")
 CONFIGS = ("A", "B", "C", "D")
 RUNS_PER_CELL = 5
 SHADER_NAME = "Sildur's Enhanced Default v1.19 Fast.zip"
+OPTIFINE_VERSION = "OptiFine_1.7.10_HD_U_E7"
+EXPECTED_SCHEMA_VERSION = 2
 SEEDS = {"A": "170710", "B": "170710", "C": "-7121280191151763024", "D": "-7121280191151763024"}
 SHADER_BY_CONFIG = {"A": "none", "B": SHADER_NAME, "C": "none", "D": SHADER_NAME}
 
@@ -153,6 +155,8 @@ def validate_export(
         errors.append("configuration is not A/B/C/D")
     if environment.get("reny", {}).get("commit_sha") != commit_sha:
         errors.append("Reny commit mismatch")
+    if summary.get("schema_version") != EXPECTED_SCHEMA_VERSION:
+        errors.append("benchmark schema version mismatch")
     if expected_config(environment) != config:
         errors.append("environment does not match configuration seed/shader")
     display = environment.get("display", {})
@@ -164,6 +168,17 @@ def validate_export(
         errors.append("optimization patches were not none")
     if extras.get("shader_pack_configured") != ("true" if SHADER_BY_CONFIG[config] != "none" else "false"):
         errors.append("shader_pack_configured mismatch")
+    if extras.get("optifine_loaded") != "true":
+        errors.append("OptiFine was not loaded")
+    if extras.get("optifine_version") != OPTIFINE_VERSION:
+        errors.append("OptiFine version mismatch")
+    if extras.get("workload_descriptor_version") != "baseline-0.0-review-1":
+        errors.append("workload descriptor version mismatch")
+    if extras.get("workload_procedure_id") != scenario:
+        errors.append("workload procedure mismatch")
+    capture = summary.get("capture", {})
+    if capture.get("complete") is not True or capture.get("truncated") is not False:
+        errors.append("formal capture is incomplete or truncated")
     for phase, configured, minimum in (("warmup", 60000, 59000), ("measurement", 120000, 119000)):
         value = summary.get(phase, {})
         try:
@@ -178,6 +193,8 @@ def validate_export(
         errors.append("frame sample count invalid")
     if tick_expected < 1000 or tick_expected != len(ticks):
         errors.append("tick sample count invalid")
+    if capture.get("frame_samples") != frame_expected or capture.get("tick_samples") != tick_expected:
+        errors.append("capture sample count mismatch")
     if errors:
         return None, "; ".join(errors)
     return {

@@ -20,13 +20,23 @@ public final class RenyBenchmarkCommand extends CommandBase {
 
     private final BenchmarkController controller;
     private final BenchmarkContextProvider contextProvider;
+    private final int requiredPermissionLevel;
 
     public RenyBenchmarkCommand(BenchmarkController controller, BenchmarkContextProvider contextProvider) {
+        this(controller, contextProvider, 0);
+    }
+
+    public RenyBenchmarkCommand(BenchmarkController controller, BenchmarkContextProvider contextProvider,
+        int requiredPermissionLevel) {
         if (controller == null || contextProvider == null) {
             throw new IllegalArgumentException("benchmark command arguments must not be null");
         }
+        if (requiredPermissionLevel < 0) {
+            throw new IllegalArgumentException("required permission level must not be negative");
+        }
         this.controller = controller;
         this.contextProvider = contextProvider;
+        this.requiredPermissionLevel = requiredPermissionLevel;
     }
 
     @Override
@@ -41,9 +51,7 @@ public final class RenyBenchmarkCommand extends CommandBase {
 
     @Override
     public int getRequiredPermissionLevel() {
-        // The client-side control surface must work in a clean singleplayer profile;
-        // starting a fixed benchmark does not grant any gameplay or server mutation.
-        return 0;
+        return requiredPermissionLevel;
     }
 
     @Override

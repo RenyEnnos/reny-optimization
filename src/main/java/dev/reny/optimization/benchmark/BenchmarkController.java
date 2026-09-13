@@ -58,7 +58,7 @@ public final class BenchmarkController {
             public BenchmarkContext create(ICommandSender sender, BenchmarkScenario scenario) {
                 return BenchmarkContexts.fromServer(sender, scenario, profileRoot);
             }
-        }));
+        }, 2));
         LOG.info("Registered /reny benchmark command on the server command surface");
     }
 
@@ -129,6 +129,7 @@ public final class BenchmarkController {
                     .getName() : exception.getMessage();
                 LOG.error("benchmark {} failed while advancing", runId, exception);
                 notifyOperator("Reny benchmark FAILED: " + lastFailure);
+                activeSession.abort();
                 activeSession = null;
                 operator = null;
             }
@@ -144,6 +145,7 @@ public final class BenchmarkController {
             LOG.warn("benchmark {} cancelled by operator", runId);
             lastFailure = "cancelled by operator: " + runId;
             notifyOperator("Reny benchmark cancelled: " + runId);
+            activeSession.abort();
             activeSession = null;
             operator = null;
             return true;

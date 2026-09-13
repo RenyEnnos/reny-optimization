@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import dev.reny.optimization.profiler.DurationSeriesSnapshot;
 import dev.reny.optimization.profiler.InternalProfiler;
+import dev.reny.optimization.profiler.ProfilerCapture;
 import dev.reny.optimization.profiler.ProfilerSnapshot;
 
 /** Explicit warmup/measurement benchmark state machine backed by the internal profiler. */
@@ -27,6 +28,7 @@ public final class BenchmarkSession {
     private long frameCutoffId;
     private long tickCutoffId;
     private ProfilerSnapshot.RuntimeSnapshot runtimeStart;
+    private ProfilerCapture capture;
 
     public BenchmarkSession(InternalProfiler profiler, BenchmarkScenario scenario, BenchmarkContext context,
         long configuredWarmupMillis, long configuredMeasurementMillis, File outputRoot) {
@@ -78,13 +80,20 @@ public final class BenchmarkSession {
         if (!shouldBeginMeasurement()) {
             throw new IllegalStateException("Configured benchmark warmup has not completed");
         }
-        ProfilerSnapshot boundary = profiler.snapshot();
-        frameCutoffId = boundary.getCurrentFrameId();
-        tickCutoffId = boundary.getCurrentTickId();
-        runtimeStart = boundary.getRuntime();
-        measurementStartedAtMillis = clock.currentTimeMillis();
-        measurementStartNanos = clock.nanoTime();
-        state = State.MEASURING;
+        ProfilerCapture startedCapture = profiler.beginBenchmarkCapture();
+        try {
+            ProfilerSnapshot boundary = profiler.snapshot();
+            frameCutoffId = boundary.getCurrentFrameId();
+            tickCutoffId = boundary.getCurrentTickId();
+            runtimeStart = boundary.getRuntime();
+            measurementStartedAtMillis = clock.currentTimeMillis();
+            measurementStartNanos = clock.nanoTime();
+            capture = startedCapture;
+            state = State.MEASURING;
+        } catch (RuntimeException exception) {
+            profiler.discardBenchmarkCapture(startedCapture);
+            throw exception;
+        }
     }
 
     public boolean shouldFinishMeasurement() {
@@ -100,9 +109,20 @@ public final class BenchmarkSession {
         long completedNanos = clock.nanoTime();
         long completedAtMillis = clock.currentTimeMillis();
         ProfilerSnapshot end = profiler.snapshot();
-        DurationSeriesSnapshot frames = end.getFrames()
+        ProfilerCapture.Snapshot captured = profiler.finishBenchmarkCapture(capture);
+        capture = null;
+        if (!captured.isComplete()) {
+            throw new IllegalStateException(
+                "Benchmark capture overflow/truncation: frame_dropped="
+                    + captured.getFrames()
+                        .getDroppedSamples()
+                    + " tick_dropped="
+                    + captured.getTicks()
+                        .getDroppedSamples());
+        }
+        DurationSeriesSnapshot frames = captured.getFrames()
             .afterId(frameCutoffId);
-        DurationSeriesSnapshot ticks = end.getTicks()
+        DurationSeriesSnapshot ticks = captured.getTicks()
             .afterId(tickCutoffId);
         BenchmarkResult result = new BenchmarkResult(
             runId,
@@ -118,10 +138,20 @@ public final class BenchmarkSession {
             frames,
             ticks,
             runtimeStart,
-            end.getRuntime());
+            end.getRuntime(),
+            true);
         File directory = BenchmarkExporter.export(result, outputRoot);
         state = State.COMPLETE;
         return directory;
+    }
+
+    /** Releases a formal capture when the controller abandons this session. */
+    public void abort() {
+        ProfilerCapture current = capture;
+        capture = null;
+        if (current != null) {
+            profiler.discardBenchmarkCapture(current);
+        }
     }
 
     public String getRunId() {

@@ -22,7 +22,13 @@ public final class BenchmarkContexts {
                 property("reny.benchmark.shader.preset", "none"))
             .extra("scenario_purpose", safeScenario.getPurpose())
             .extra("optimization_profile", "COMPATIBLE")
-            .extra("optimization_patches", "none");
+            .extra("optimization_patches", "none")
+            .extra("workload_descriptor_version", "baseline-0.0-review-1")
+            .extra("workload_procedure_id", safeScenario.getId())
+            .extra("camera_policy", "fixed snapshot yaw/pitch; no mouse input")
+            .extra("movement_policy", movementPolicy(safeScenario))
+            .extra("movement_speed_policy", movementSpeedPolicy(safeScenario))
+            .extra("scene_identity_policy", "world descriptor plus seed and snapshot route");
     }
 
     public static BenchmarkContext fromServer(ICommandSender sender, BenchmarkScenario scenario, File profileRoot) {
@@ -40,6 +46,16 @@ public final class BenchmarkContexts {
         } catch (SecurityException ignored) {
             return fallback;
         }
+    }
+
+    private static String movementPolicy(BenchmarkScenario scenario) {
+        return scenario == BenchmarkScenario.CHUNK_TRAVERSAL ? "hold W; sprint disabled; no camera input"
+            : "stationary; no movement or camera input";
+    }
+
+    private static String movementSpeedPolicy(BenchmarkScenario scenario) {
+        return scenario == BenchmarkScenario.CHUNK_TRAVERSAL ? "Minecraft default walking speed; mouseSensitivity=0.5"
+            : "not applicable; player remains at snapshot route";
     }
 
     static void applyWorld(BenchmarkContext.Builder builder, World world, String route) {

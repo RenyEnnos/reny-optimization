@@ -16,6 +16,7 @@ public final class InternalProfilerSelfTest {
     private void run() throws Exception {
         testDurationPercentiles();
         testRingKeepsNewestSamples();
+        testFormalCaptureRetainsCompleteWindow();
         testFrameTickCorrelation();
         testThresholdCounters();
         testDisablePaths();
@@ -44,6 +45,25 @@ public final class InternalProfilerSelfTest {
         equal(3L, snapshot.size(), "ring size");
         equal(2L, snapshot.getId(0), "oldest retained id");
         equal(4L, snapshot.getId(2), "newest retained id");
+        equal(1L, snapshot.getDroppedSamples(), "ring dropped sample count");
+        pass();
+    }
+
+    private void testFormalCaptureRetainsCompleteWindow() {
+        InternalProfiler profiler = new InternalProfiler(2, 2, 32);
+        ProfilerCapture capture = profiler.beginBenchmarkCapture();
+        for (long id = 1L; id <= 20L; id++) {
+            profiler.recordFrameDurationNanos(id, id, id * 1_000L);
+        }
+        for (long id = 1L; id <= 12L; id++) {
+            profiler.recordTickDurationNanos(id, id, id * 2_000L);
+        }
+        ProfilerCapture.Snapshot snapshot = profiler.finishBenchmarkCapture(capture);
+        check(snapshot.isComplete(), "formal capture must not truncate within its limit");
+        equal(20L, snapshot.getFrames().size(), "complete captured frame count");
+        equal(12L, snapshot.getTicks().size(), "complete captured tick count");
+        equal(0L, snapshot.getFrames().getDroppedSamples(), "captured frame drops");
+        equal(0L, snapshot.getTicks().getDroppedSamples(), "captured tick drops");
         pass();
     }
 
