@@ -159,8 +159,12 @@ public final class BenchmarkExporter {
             out.println("  \"capture\": {");
             out.println("    \"complete\": " + result.isCaptureComplete() + ',');
             out.println("    \"truncated\": false,");
-            out.println("    \"frame_samples\": " + result.getFrames().size() + ',');
-            out.println("    \"tick_samples\": " + result.getTicks().size());
+            out.println(
+                "    \"frame_samples\": " + result.getFrames()
+                    .size() + ',');
+            out.println(
+                "    \"tick_samples\": " + result.getTicks()
+                    .size());
             out.println("  },");
             writeFrameSummary(out, frame);
             out.println(',');

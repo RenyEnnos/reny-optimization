@@ -83,7 +83,8 @@ final class DurationSeries {
         }
     }
 
-    private DurationSeriesSnapshot copy(int localCursor, int localSize, long localTotalSamples, long localDroppedSamples) {
+    private DurationSeriesSnapshot copy(int localCursor, int localSize, long localTotalSamples,
+        long localDroppedSamples) {
         long[] copiedIds = new long[localSize];
         long[] copiedCorrelations = new long[localSize];
         long[] copiedDurations = new long[localSize];

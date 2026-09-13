@@ -5,9 +5,11 @@ import java.util.Arrays;
 /**
  * Append-only sample storage for one formal benchmark capture.
  *
- * <p>Growth happens only when a capture crosses a capacity boundary; recording within an allocated block remains
+ * <p>
+ * Growth happens only when a capture crosses a capacity boundary; recording within an allocated block remains
  * allocation-free. A hard limit turns an out-of-memory-sized workload into an explicit invalid capture instead of a
- * silently truncated distribution.</p>
+ * silently truncated distribution.
+ * </p>
  */
 final class DurationSeriesCapture {
 

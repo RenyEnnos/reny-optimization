@@ -60,10 +60,26 @@ public final class InternalProfilerSelfTest {
         }
         ProfilerCapture.Snapshot snapshot = profiler.finishBenchmarkCapture(capture);
         check(snapshot.isComplete(), "formal capture must not truncate within its limit");
-        equal(20L, snapshot.getFrames().size(), "complete captured frame count");
-        equal(12L, snapshot.getTicks().size(), "complete captured tick count");
-        equal(0L, snapshot.getFrames().getDroppedSamples(), "captured frame drops");
-        equal(0L, snapshot.getTicks().getDroppedSamples(), "captured tick drops");
+        equal(
+            20L,
+            snapshot.getFrames()
+                .size(),
+            "complete captured frame count");
+        equal(
+            12L,
+            snapshot.getTicks()
+                .size(),
+            "complete captured tick count");
+        equal(
+            0L,
+            snapshot.getFrames()
+                .getDroppedSamples(),
+            "captured frame drops");
+        equal(
+            0L,
+            snapshot.getTicks()
+                .getDroppedSamples(),
+            "captured tick drops");
         pass();
     }
 

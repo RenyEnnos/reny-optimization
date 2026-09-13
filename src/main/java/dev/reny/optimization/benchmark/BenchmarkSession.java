@@ -113,9 +113,8 @@ public final class BenchmarkSession {
         capture = null;
         if (!captured.isComplete()) {
             throw new IllegalStateException(
-                "Benchmark capture overflow/truncation: frame_dropped="
-                    + captured.getFrames()
-                        .getDroppedSamples()
+                "Benchmark capture overflow/truncation: frame_dropped=" + captured.getFrames()
+                    .getDroppedSamples()
                     + " tick_dropped="
                     + captured.getTicks()
                         .getDroppedSamples());
