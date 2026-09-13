@@ -134,7 +134,7 @@ public final class InternalProfiler {
             return;
         }
         long duration = elapsedSince(startNanos);
-        ticks.record(currentTickId, currentFrameId, duration);
+        recordTickDurationNanos(currentTickId, currentFrameId, duration);
     }
 
     public long startSection(ProfilerSection section) {

@@ -80,6 +80,22 @@ public final class InternalProfilerSelfTest {
             snapshot.getTicks()
                 .getDroppedSamples(),
             "captured tick drops");
+        ProfilerCapture hookCapture = profiler.beginBenchmarkCapture();
+        long frameStart = profiler.beginFrame();
+        profiler.endFrame(frameStart);
+        long tickStart = profiler.beginTick();
+        profiler.endTick(tickStart);
+        ProfilerCapture.Snapshot hookSnapshot = profiler.finishBenchmarkCapture(hookCapture);
+        equal(
+            1L,
+            hookSnapshot.getFrames()
+                .size(),
+            "hook frame capture");
+        equal(
+            1L,
+            hookSnapshot.getTicks()
+                .size(),
+            "hook tick capture");
         pass();
     }
 
