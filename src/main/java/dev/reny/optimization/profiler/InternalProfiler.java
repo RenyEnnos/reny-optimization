@@ -88,8 +88,7 @@ public final class InternalProfiler {
                 throw new IllegalStateException("Benchmark profiler capture is not active");
             }
             activeCapture = null;
-            capture.close();
-            return capture.snapshot();
+            return capture.closeAndSnapshot();
         }
     }
 
@@ -219,25 +218,37 @@ public final class InternalProfiler {
         return output;
     }
 
-    void recordFrameDurationNanos(long frameId, long tickId, long durationNanos) {
+    boolean recordFrameDurationNanos(long frameId, long tickId, long durationNanos) {
         frames.record(frameId, tickId, durationNanos);
         ProfilerCapture capture = activeCapture;
+        boolean captured = false;
         if (capture != null) {
-            capture.recordFrame(frameId, tickId, durationNanos);
+            synchronized (captureMonitor) {
+                if (activeCapture == capture) {
+                    captured = capture.recordFrame(frameId, tickId, durationNanos);
+                }
+            }
         }
         for (int i = 0; i < FRAME_THRESHOLDS_NANOS.length; i++) {
             if (durationNanos > FRAME_THRESHOLDS_NANOS[i]) {
                 frameThresholdCounts[i].increment();
             }
         }
+        return captured;
     }
 
-    void recordTickDurationNanos(long tickId, long frameId, long durationNanos) {
+    boolean recordTickDurationNanos(long tickId, long frameId, long durationNanos) {
         ticks.record(tickId, frameId, durationNanos);
         ProfilerCapture capture = activeCapture;
+        boolean captured = false;
         if (capture != null) {
-            capture.recordTick(tickId, frameId, durationNanos);
+            synchronized (captureMonitor) {
+                if (activeCapture == capture) {
+                    captured = capture.recordTick(tickId, frameId, durationNanos);
+                }
+            }
         }
+        return captured;
     }
 
     private static long elapsedSince(long startNanos) {

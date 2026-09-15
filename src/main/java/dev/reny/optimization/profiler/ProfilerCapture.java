@@ -14,23 +14,36 @@ public final class ProfilerCapture {
         ticks = new DurationSeriesCapture(maxSamples);
     }
 
-    void recordFrame(long frameId, long tickId, long durationNanos) {
-        if (open) {
-            frames.record(frameId, tickId, durationNanos);
+    synchronized boolean recordFrame(long frameId, long tickId, long durationNanos) {
+        if (!open) {
+            return false;
         }
+        frames.record(frameId, tickId, durationNanos);
+        return true;
     }
 
-    void recordTick(long tickId, long frameId, long durationNanos) {
-        if (open) {
-            ticks.record(tickId, frameId, durationNanos);
+    synchronized boolean recordTick(long tickId, long frameId, long durationNanos) {
+        if (!open) {
+            return false;
         }
+        ticks.record(tickId, frameId, durationNanos);
+        return true;
     }
 
-    void close() {
+    synchronized void close() {
         open = false;
     }
 
-    Snapshot snapshot() {
+    synchronized Snapshot closeAndSnapshot() {
+        open = false;
+        return snapshotUnsafe();
+    }
+
+    synchronized Snapshot snapshot() {
+        return snapshotUnsafe();
+    }
+
+    private Snapshot snapshotUnsafe() {
         return new Snapshot(frames.snapshot(), ticks.snapshot());
     }
 

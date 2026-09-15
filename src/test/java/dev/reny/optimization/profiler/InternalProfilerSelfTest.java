@@ -3,6 +3,10 @@ package dev.reny.optimization.profiler;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Dependency-free verification for the profiler core. */
 public final class InternalProfilerSelfTest {
@@ -17,6 +21,7 @@ public final class InternalProfilerSelfTest {
         testDurationPercentiles();
         testRingKeepsNewestSamples();
         testFormalCaptureRetainsCompleteWindow();
+        testConcurrentCaptureCloseHandoff();
         testFrameTickCorrelation();
         testThresholdCounters();
         testDisablePaths();
@@ -114,6 +119,93 @@ public final class InternalProfilerSelfTest {
             snapshot.getTicks()
                 .getCorrelationId(0),
             "tick -> frame correlation");
+        pass();
+    }
+
+    private void testConcurrentCaptureCloseHandoff() throws Exception {
+        final InternalProfiler profiler = new InternalProfiler(64, 64, 1_000_000);
+        final ProfilerCapture capture = profiler.beginBenchmarkCapture();
+        final AtomicInteger acceptedFrames = new AtomicInteger();
+        final AtomicInteger acceptedTicks = new AtomicInteger();
+        final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+        final CountDownLatch ready = new CountDownLatch(2);
+        final CountDownLatch start = new CountDownLatch(1);
+        final CountDownLatch firstSample = new CountDownLatch(1);
+
+        Thread frameWriter = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    ready.countDown();
+                    start.await();
+                    for (long id = 1L; id <= 100_000L; id++) {
+                        if (profiler.recordFrameDurationNanos(id, id, 1_000L)) {
+                            acceptedFrames.incrementAndGet();
+                        }
+                        if (id == 1L) {
+                            firstSample.countDown();
+                        }
+                    }
+                } catch (Throwable exception) {
+                    failure.compareAndSet(null, exception);
+                }
+            }
+        }, "reny-profiler-frame-writer");
+        Thread tickWriter = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    ready.countDown();
+                    start.await();
+                    for (long id = 1L; id <= 100_000L; id++) {
+                        if (profiler.recordTickDurationNanos(id, id, 2_000L)) {
+                            acceptedTicks.incrementAndGet();
+                        }
+                        if (id == 1L) {
+                            firstSample.countDown();
+                        }
+                    }
+                } catch (Throwable exception) {
+                    failure.compareAndSet(null, exception);
+                }
+            }
+        }, "reny-profiler-tick-writer");
+
+        frameWriter.start();
+        tickWriter.start();
+        check(ready.await(10L, TimeUnit.SECONDS), "concurrent writers become ready");
+        start.countDown();
+        check(firstSample.await(10L, TimeUnit.SECONDS), "concurrent writers record first sample");
+        ProfilerCapture.Snapshot snapshot = profiler.finishBenchmarkCapture(capture);
+        frameWriter.join(10_000L);
+        tickWriter.join(10_000L);
+        check(!frameWriter.isAlive() && !tickWriter.isAlive(), "concurrent writers terminate");
+        if (failure.get() != null) {
+            throw new AssertionError("concurrent capture writer failed", failure.get());
+        }
+        check(snapshot.isComplete(), "concurrent capture remains complete");
+        equal(
+            acceptedFrames.get(),
+            snapshot.getFrames()
+                .getTotalSamples(),
+            "captured frame count matches accepted writes");
+        equal(
+            acceptedTicks.get(),
+            snapshot.getTicks()
+                .getTotalSamples(),
+            "captured tick count matches accepted writes");
+        equal(
+            acceptedFrames.get(),
+            snapshot.getFrames()
+                .size(),
+            "all accepted frames are retained");
+        equal(
+            acceptedTicks.get(),
+            snapshot.getTicks()
+                .size(),
+            "all accepted ticks are retained");
         pass();
     }
 
