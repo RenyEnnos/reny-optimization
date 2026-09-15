@@ -79,7 +79,8 @@ public final class RenyClientRuntime {
         builder.shader(shaderName, shaderVersion, shaderPreset)
             .extra("shader_pack_configured", String.valueOf(!isNoShader(shaderPack)))
             .extra("optifine_loaded", String.valueOf(isOptiFineLoaded()))
-            .extra("optifine_version", discoverOptiFineVersion());
+            .extra("optifine_version", discoverOptiFineVersion())
+            .extra("game_mode", gameMode(minecraft));
         World clientWorld = minecraft.theWorld;
         if (clientWorld == null) {
             return builder.world("unknown", "no-world", "unknown", "unknown")
@@ -188,6 +189,13 @@ public final class RenyClientRuntime {
         }
         return !minecraft.gameSettings.enableVsync && isUncapped(minecraft.gameSettings.limitFramerate) ? "true"
             : "false";
+    }
+
+    private static String gameMode(Minecraft minecraft) {
+        if (minecraft == null || minecraft.thePlayer == null || minecraft.thePlayer.capabilities == null) {
+            return "unknown";
+        }
+        return minecraft.thePlayer.capabilities.isCreativeMode ? "creative" : "survival";
     }
 
     /** Minecraft 1.7.10 uses the slider maximum (260) as its uncapped sentinel. */

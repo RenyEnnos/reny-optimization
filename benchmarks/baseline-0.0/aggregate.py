@@ -172,6 +172,8 @@ def validate_export(
         errors.append("OptiFine was not loaded")
     if extras.get("optifine_version") != OPTIFINE_VERSION:
         errors.append("OptiFine version mismatch")
+    if extras.get("game_mode") != "creative":
+        errors.append("game mode was not creative")
     if extras.get("workload_descriptor_version") != "baseline-0.0-review-1":
         errors.append("workload descriptor version mismatch")
     if extras.get("workload_procedure_id") != scenario:
