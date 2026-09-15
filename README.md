@@ -4,6 +4,12 @@ Reny Optimization is an experimental performance project for **Minecraft 1.7.10 
 
 The project is intentionally measurement-driven: optimizations should be justified by profiling data and benchmarked before and after implementation.
 
+## Long-term vision
+
+Reny aims to become the **central optimization runtime for Minecraft Forge 1.7.10**: a system that can implement, coordinate, delegate, adapt, replace, or reject optimization capabilities according to profiling and compatibility evidence instead of blindly bundling or duplicating existing optimization mods.
+
+See [Optimization Runtime Vision](docs/OPTIMIZATION_RUNTIME_VISION.md) for the capability-first model and long-term provider strategy.
+
 ## Project goals
 
 - Improve frame-time consistency, especially P95/P99/P99.9 latency.
