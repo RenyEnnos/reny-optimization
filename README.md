@@ -10,6 +10,14 @@ Reny aims to become the **central optimization runtime for Minecraft Forge 1.7.1
 
 See [Optimization Runtime Vision](docs/OPTIMIZATION_RUNTIME_VISION.md) for the capability-first model and long-term provider strategy.
 
+## Related project: Reny Shaders
+
+**Reny Shaders** is the proposed performance-first visual renderer/shaderpack for **The Reawakening**. Its governing objective is to maximize **perceived visual quality per millisecond of GPU time**, using approximation, low-resolution work, reconstruction, and pack-aware rendering where these techniques provide better visual return for the cost.
+
+Its canonical pre-research direction — including the dark-fantasy art target, Lite/Default/Showcase profiles, project boundaries, agent rules, and open research questions — is documented in [Reny Shaders — Product and Rendering Vision](docs/RENY_SHADERS_VISION.md).
+
+Reny Shaders is related to Reny Optimization but is a separate product: the optimization runtime may provide efficient rendering infrastructure, while the shaderpack owns the intended image and visual-performance tradeoffs.
+
 ## Project goals
 
 - Improve frame-time consistency, especially P95/P99/P99.9 latency.
