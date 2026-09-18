@@ -66,8 +66,12 @@ also reports run-level dispersion, threshold rates, MSPT, GC, and heap delta.
 
 - `methodology.md` — scope and execution protocol.
 - `environment-summary.json` — reproducible runtime and workload identity.
+- `heavy-mod-manifest.json` — normalized list of all 72 active FML mods (IDs,
+  names, versions) and configuration snapshot hashes.
 - `runtime-manifest.json` — exact runtime artifacts, profiles, worlds, and
   safety boundaries.
+- `evidence/` — representative external CPU profiles (HTML flamegraphs,
+  collapsed stacks, hotspots) and GPU frequency telemetry.
 - `aggregate.py` — deterministic aggregation and validation.
 - `aggregate.csv` / `aggregate.json` — generated only after the campaign has
   enough valid result exports; these are the final 80-run outputs.
