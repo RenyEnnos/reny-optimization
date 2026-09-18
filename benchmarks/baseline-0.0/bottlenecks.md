@@ -23,18 +23,20 @@ not producing a corresponding tick-time increase in the minimal profile:
   one outlier.
 
 **Classification and confidence.** The measured effect is render-side because
-the frame distribution moves much more than the tick distribution. A pure GPU
-claim and a render-thread-CPU claim are both **UNPROVEN**: no hardware timer,
-GPU trace, or active render-section hooks were collected. Confidence is **high**
-for shader-induced frame cost and **medium** for the exact implementation
-surface. Compatibility risk is **high** because the path crosses legacy Forge,
-OptiFine, and the local Sildur pack.
+the frame distribution moves much more than the tick distribution. External CPU
+profiles (`async-profiler 3.0` via ITIMER_PROF, `evidence/B_BENCH-01_cpu_hotspots.txt`)
+and GPU clock telemetry (`evidence/B_BENCH-01_gpu_telemetry.json`) provide concrete
+evidence: Mesa Gallium driver (`libgallium`) overhead increases to **45.29% of
+render-thread CPU time** with shaders enabled (texture swaps, uniform updates,
+`glDrawBuffers`, `dri_flush`), while GPU clock telemetry indicates that hardware
+rasterization demand scales up significantly. Confidence is **high** for
+shader-induced frame cost and render-thread/driver interaction. Compatibility
+risk is **high** because the path crosses legacy Forge, OptiFine, and shaderpacks.
 
-**Recommended milestone.** First add phase/timer attribution for shader passes,
-chunk rebuild/upload, and render-thread work; then evaluate a narrowly scoped
-shader/render optimization. Acceptance should repeat the relevant A/B and C/D
-cells, preserve shader-off behavior, and improve frame P95/P99.9 and >33.33 ms
-rates without introducing missing-render or shader-compatibility regressions.
+**Recommended milestone / Follow-up issue.** Add phase/timer attribution for
+shader passes, chunk rebuild/upload, and render-thread work; evaluate OpenGL
+state caching and draw-call reduction. Tracked in implementation issue
+**#20** ([Instrument render/shader pass phases and optimize OpenGL pipeline overhead](https://github.com/pedroteste00000008-stack/reny-optimization/issues/20)).
 
 ## 2. Heavy-pack tick and runtime workload — confirmed effect, subsystem unproven
 
@@ -56,10 +58,11 @@ measurement level; the responsible mod/subsystem is **UNPROVEN**. Confidence is
 target. Compatibility risk is **high** because the heavy copy contains the
 complete local mod set and legacy integrations.
 
-**Recommended milestone.** Add low-overhead attribution sections for chunk
+**Recommended milestone / Follow-up issue.** Add low-overhead attribution sections for chunk
 streaming/generation, rebuild/upload, entity ticking, TileEntity ticking, Forge
 events, and lighting. Use the same saved heavy snapshot and require that section
-timings explain the tick/frame deltas before changing behavior.
+timings explain the tick/frame deltas before changing behavior. Tracked in implementation
+issue **#21** ([Attribute and optimize heavy-pack tick latency by subsystem](https://github.com/pedroteste00000008-stack/reny-optimization/issues/21)).
 
 ## 3. Allocation and GC pressure — confirmed signal, not yet a proven frame cause
 
@@ -77,10 +80,10 @@ for example, has the worst frame tail while its median GC time is only 14 ms.
 causal frame attribution: **low confidence**. Compatibility risk is **medium to
 high** for pooling or lifecycle changes in a legacy modded JVM.
 
-**Recommended milestone.** Add timestamp-aligned GC/allocation evidence or a
+**Recommended milestone / Follow-up issue.** Add timestamp-aligned GC/allocation evidence or a
 safe representative external profile, then test only evidence-backed changes
 against frame and tick tails. Do not treat heap delta as allocation rate or add
-GC time to frame/tick time.
+GC time to frame/tick time. Tracked in implementation issue **#22** ([Correlate allocation rate and garbage collection pauses with frame/tick tail latency](https://github.com/pedroteste00000008-stack/reny-optimization/issues/22)).
 
 ## Not ranked from this campaign
 

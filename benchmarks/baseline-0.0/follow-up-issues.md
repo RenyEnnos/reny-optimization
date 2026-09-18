@@ -1,72 +1,85 @@
-# Follow-up issue drafts
+# Follow-up implementation issues
 
-These are drafts only. Issue #7's baseline does not implement an optimization,
-open issues, or merge changes automatically.
+The following bounded implementation issues have been formally created on GitHub
+to address the top bottlenecks confirmed by Issue #7 and supported by the
+representative CPU and GPU profiling evidence:
 
-## Draft 1 — Add render/shader phase attribution before optimization
+## Issue #20 — [Instrument render/shader pass phases and optimize OpenGL pipeline overhead](https://github.com/pedroteste00000008-stack/reny-optimization/issues/20)
 
-**Measured problem:** Shader-on rendering is the strongest frame-budget effect.
-Minimal B/BENCH-01 has 52.131 ms frame P95 and 76.115 ms P99.9 versus 4.747 ms
-and 16.127 ms in shader-off A. Heavy D/BENCH-06 has 36.997 ms P95 and 54.335
-ms P99.9 versus 19.499 ms and 30.276 ms in shader-off C.
+**Measured problem:** Shader-on rendering is the single largest frame-budget
+regressor. In minimal BENCH-01, frame P95 degrades from 4.21 ms to >52 ms with
+shaders enabled. External CPU profiling (`async-profiler 3.0` via ITIMER_PROF,
+`evidence/B_BENCH-01_cpu_hotspots.txt`) proves that **45.29% of render-thread
+CPU time** is consumed inside the OpenGL driver (`libgallium`), heavily dominated
+by uniform state manipulation, texture management, `glDrawBuffers`, and
+buffer-swap synchronizations.
 
-**Intended metric:** Per-phase render/shader timing, frame P95/P99/P99.9, and
-frame thresholds above 16.67/33.33/50 ms. Keep tick metrics separate.
+**Intended metric:** Per-phase render/shader timing (shadows, gbuffers,
+composites, final), frame P95/P99/P99.9 latency, and frame threshold reductions
+(>16.67 ms, >33.33 ms, >50 ms).
 
-**Implementation surface:** Instrument the legacy render-thread/shader-pass
-boundaries with bounded, opt-in timing. Do not assume that the observed cost is
-pure GPU time; add a hardware-timer path only when available.
+**Implementation surface:** Legitimate instrumentation of shader pass boundaries,
+uniform state caching, and draw-call overhead reduction in the OptiFine render
+pipeline.
 
-**Compatibility considerations:** Preserve OptiFine E7 and the exact Sildur
-pack behavior, shader-off behavior, and Forge 1.7.10 compatibility. Avoid
-changing render order or shader contracts in the attribution issue.
+**Compatibility considerations:** Must maintain strict backward compatibility
+with OptiFine 1.7.10 HD U E7 and standard shaderpacks (`Sildur's Enhanced
+Default v1.19 Fast.zip`). Must fail-closed if unexpected bytecode is encountered.
 
-**Acceptance benchmark:** Repeat the relevant A/B and C/D BENCH-01 and BENCH-06
-cells with five runs each, confirm phase attribution is populated, and require
-no new boot/render errors. Any optimization proposal must use those timings and
-the existing 1280×720 protocol.
+**Acceptance benchmark:** 5 independent runs of BENCH-01 and BENCH-06 under
+Configurations A, B, C, D using the established 1280×720 protocol.
 
-## Draft 2 — Attribute heavy-pack CPU/tick cost by subsystem
+---
 
-**Measured problem:** With shaders off, C versus A raises frame P95 by
-15.440–17.936 ms and tick P95 by 2.766–5.698 ms across the four scenarios.
-Heavy cells also have median GC time of 97–155 ms per 120-second run versus
-10–21 ms in minimal A.
+## Issue #21 — [Attribute and optimize heavy-pack tick latency by subsystem (TileEntity, entity, and chunk lifecycle)](https://github.com/pedroteste00000008-stack/reny-optimization/issues/21)
 
-**Intended metric:** Separate section timings for chunk streaming/generation,
-chunk rebuild/upload, entity ticking, TileEntity ticking, Forge events, and
-lighting; report tick P50/P95/P99 and frame tails without summing unlike clocks.
+**Measured problem:** The heavy reference modpack (The Reawakening, 72 loaded FML
+mods) increases tick P95 across all canonical scenarios compared to the minimal
+baseline (an increase of 2.77–5.70 ms even in stationary workloads). External CPU
+profiling shows significant main/server thread time spent in
+`ChunkProviderServer.func_73158_c`, `World.func_72939_s`, and entity ticking.
+Without dedicated section hooks, exact attribution among TileEntities, entity
+ticking, chunk lifecycle, and Forge event dispatch remains `UNPROVEN`.
 
-**Implementation surface:** Add low-overhead section hooks around the existing
-workload boundaries, with explicit enable/disable metadata and no behavior
-change. Keep the hooks safe for the complete isolated The Reawakening mod set.
+**Intended metric:** Tick P50/P95/P99 latency, MSPT distribution, and
+sub-millisecond section execution timings for TileEntities, entities, chunks, and
+Forge events.
 
-**Compatibility considerations:** The heavy snapshot is a real local legacy
-pack with 72 loaded FML mods and known nonfatal compatibility noise. Hooks must
-not alter event ordering, tick scheduling, chunk state, or TileEntity lifecycle.
+**Implementation surface:** Low-overhead profiler section instrumentation around
+`MinecraftServer` / `WorldServer` tick loops, entity dispatch, TileEntity
+updates, and chunk I/O.
 
-**Acceptance benchmark:** Run five repeated C and D measurements for BENCH-01,
-BENCH-02, BENCH-03, and BENCH-06; every export must contain valid section rows,
-unchanged world/config identity, and the same completion gates as Baseline 0.0.
+**Compatibility considerations:** Must preserve complete compatibility with the
+72 FML mods documented in `heavy-mod-manifest.json`. Must not alter event dispatch
+ordering or block entity lifecycles.
 
-## Draft 3 — Correlate allocation/GC pauses with frame and tick tails
+**Acceptance benchmark:** 5 independent runs of BENCH-02 (chunk traversal) and
+BENCH-03 (industrial base) on configurations C and D, confirming valid subsystem
+timings in exported summaries.
 
-**Measured problem:** Heavy D/BENCH-06 has 243 ms median GC time per 120 s;
-D/BENCH-02 has a 679 ms run-level maximum. This is a confirmed JVM signal, but
-the current aggregate cannot prove that GC caused a particular frame tail.
+---
 
-**Intended metric:** Timestamp-aligned GC events, heap/allocation samples, frame
-long-frame counts, and tick tails. Do not treat heap delta as allocation rate.
+## Issue #22 — [Correlate allocation rate and garbage collection pauses with frame/tick tail latency](https://github.com/pedroteste00000008-stack/reny-optimization/issues/22)
 
-**Implementation surface:** Extend the safe profiler export or collect a
-representative non-privileged external trace when available. Keep the default
-benchmark overhead bounded and record the collection mode in environment.json.
+**Measured problem:** Heavy profile runs exhibit elevated garbage collection
+activity (up to 243 ms median GC time per 120-second measurement window, with
+run-level peaks up to 679 ms). Currently, runtime metrics capture aggregate
+`gc_count` and `gc_time_ms`, but do not record individual timestamped pause
+intervals aligned with frame deltas, leaving causal attribution of specific P99/P99.9
+frame spikes to GC pauses unproven.
 
-**Compatibility considerations:** Do not change heap sizing, collector choice,
-or object lifetimes as part of this diagnostic issue. Legacy mods may depend on
-allocation and lifecycle behavior.
+**Intended metric:** Individual GC pause start/end timestamps and durations,
+frame P99/P99.9 spike correlation index (% of >50 ms frames coinciding with a GC
+pause), and heap allocation rate.
 
-**Acceptance benchmark:** Re-run representative A/B/C/D BENCH-01 and BENCH-06
-cells with five runs per cell, show aligned pause/tail evidence, and only then
-draft a narrowly scoped allocation optimization with a before/after acceptance
-threshold.
+**Implementation surface:** Passive JVM `GarbageCollectorMXBean` notification
+listeners and JMX/JFR integration, exporting timestamped pause events alongside
+`frames.csv` and `ticks.csv`.
+
+**Compatibility considerations:** Passive telemetry only; do not alter JVM
+memory flags, collector choice, or object allocations. Ensure zero allocation
+overhead on render and server tick hot paths.
+
+**Acceptance benchmark:** Representative runs of BENCH-01, BENCH-02, and
+BENCH-06 under configurations C and D, demonstrating aligned pause/frame tail
+correlation.
