@@ -1,0 +1,5 @@
+{
+  "name": "reny-minecraft-dev-adapter",
+  "private": true,
+  "scripts": { "start": "node launcher.js" }
+}

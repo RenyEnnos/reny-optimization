@@ -1,0 +1,9 @@
+{
+  "mcp": {
+    "minecraft-dev": {
+      "command": "node",
+      "args": ["tools/minecraft-dev/launcher.js"],
+      "env": { "MINECRAFT_DEV_BRIDGE_TOKEN": "minecraft-dev-local" }
+    }
+  }
+}

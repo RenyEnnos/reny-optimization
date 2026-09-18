@@ -1,8 +1,34 @@
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.api.tasks.WriteProperties
+import org.gradle.jvm.tasks.Jar
 
 plugins {
     id("com.gtnewhorizons.gtnhconvention")
+}
+
+// The bridge is compiled from the generic toolkit only when requested. It is
+// deliberately excluded from the mod jar: the running toolkit owns these
+// classes, while Reny only owns its provider/extension.
+val bridgeRequested = providers.gradleProperty("minecraft.dev.bridge")
+    .map(String::toBoolean)
+    .orElse(false)
+    .get() || System.getProperty("minecraft.dev.bridge").toBoolean()
+val bridgeHome = providers.environmentVariable("MINECRAFT_DEV_TOOLKIT_HOME")
+    .map { file(it) }
+    .orElse(file("../minecraft-dev-toolkit"))
+val bridgeSources = bridgeHome.map { it.resolve("bridge/forge-1.7.10/src/main/java") }
+if (bridgeRequested && !bridgeSources.get().isDirectory) {
+    throw GradleException("minecraft.dev.bridge requested, but bridge sources were not found. Set MINECRAFT_DEV_TOOLKIT_HOME or provide sibling minecraft-dev-toolkit.")
+}
+if (bridgeSources.get().isDirectory) {
+    sourceSets["main"].java.srcDir(bridgeSources)
+} else {
+    // The normal mod remains buildable without the optional toolkit checkout.
+    sourceSets["main"].java.exclude("dev/reny/optimization/devbridge/**")
+}
+tasks.withType<Jar>().configureEach {
+    exclude("dev/reny/minecraftdev/bridge/**")
+    exclude("dev/reny/optimization/devbridge/**")
 }
 
 val generatedRenyBuildInfo = layout.buildDirectory.file("generated-resources/reny/reny-build.properties")
@@ -59,6 +85,14 @@ tasks.register<JavaExec>("profilerSelfTest") {
     mainClass.set("dev.reny.optimization.profiler.InternalProfilerSelfTest")
 }
 
+tasks.register<JavaExec>("renyProfilerJsonSelfTest") {
+    group = "verification"
+    description = "Runs the dependency-free Reny bridge profiler JSON self-test."
+    dependsOn(tasks.named("testClasses"))
+    classpath = sourceSets["test"].runtimeClasspath
+    mainClass.set("dev.reny.optimization.devbridge.RenyProfilerJsonSelfTest")
+}
+
 tasks.register<JavaExec>("benchmarkHarnessSelfTest") {
     group = "verification"
     description = "Runs the dependency-free benchmark harness self-test suite."
@@ -88,6 +122,7 @@ tasks.named("check") {
         "patchRegistrySelfTest",
         "compatibilitySelfTest",
         "profilerSelfTest",
+        "renyProfilerJsonSelfTest",
         "benchmarkHarnessSelfTest",
         "benchmarkControllerSelfTest")
 }

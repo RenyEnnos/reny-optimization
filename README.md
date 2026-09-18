@@ -50,4 +50,17 @@ The project is intentionally measurement-driven: optimizations should be justifi
 
 **Pre-alpha / architecture bootstrap.**
 
+## Integração minecraft-dev-toolkit
+
+O bridge é opcional e server-safe. Defina `minecraft.dev.bridge` como propriedade
+JVM (e, no Gradle, `-Pminecraft.dev.bridge`) para armá-lo; o token vem de
+`minecraft.dev.bridge.token` ou de `MINECRAFT_DEV_BRIDGE_TOKEN`. As fontes são
+resolvidas por `MINECRAFT_DEV_TOOLKIT_HOME` ou pelo irmão `minecraft-dev-toolkit`.
+O adaptador local inicia com `node tools/minecraft-dev/launcher.js` e expõe
+somente `reny_get_profiler_snapshot`, capability `profiler.read`, em
+`GET /reny/profiler`, com snapshot read-only de heap/GC/tasks, IDs e seções.
+
+Patches não são expostos pelo bridge: `PatchRegistry` não possui uma instância
+runtime disponível para esse contrato.
+
 The first milestone is `0.1 — Instrumented Core`: a stable bootstrap, compatibility/patch registry, internal profiler, benchmark protocol, and diagnostic tooling. Large invasive optimizations come only after the baseline dataset exists.

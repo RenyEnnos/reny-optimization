@@ -56,6 +56,15 @@ public final class RenyOptimization {
             Tags.VERSION,
             profiler.getConfig()
                 .isEnabled());
+        try {
+            Class.forName("dev.reny.optimization.devbridge.RenyDevBridgeBootstrap")
+                .getMethod("initialize")
+                .invoke(null);
+        } catch (ClassNotFoundException absentOptionalBridge) {
+            // The generic toolkit is optional; normal Reny startup is unchanged.
+        } catch (Throwable bridgeFailure) {
+            LOG.error("Unable to initialize optional minecraft-dev bridge", bridgeFailure);
+        }
     }
 
     @Mod.EventHandler
