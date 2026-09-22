@@ -82,10 +82,9 @@ Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before runni
 
 ### OMP
 
-OMP uses the project-local `.omp/mcp.json` definition. It launches the same shared Toolkit entrypoint and resolves it as:
+OMP uses the project-local `.omp/mcp.json` definition and launches the same shared Toolkit entrypoint. The committed OMP-native config uses the canonical sibling checkout `../minecraft-dev-toolkit`; it does not rely on shell-style `${VAR:-default}` expansion in `args`. For a non-sibling local layout, use a non-versioned OMP user override rather than committing an absolute path.
 
-1. `MINECRAFT_DEV_TOOLKIT_HOME`, when set;
-2. otherwise the sibling checkout `../minecraft-dev-toolkit`.
+OpenCode and OMP configurations are independent contracts. OMP autodiscovery of `opencode.json` is not relied upon.
 
 From the repository root, reload and inspect the server with:
 
