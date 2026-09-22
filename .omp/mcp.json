@@ -5,7 +5,7 @@
       "type": "stdio",
       "command": "node",
       "args": [
-        "${MINECRAFT_DEV_TOOLKIT_HOME:-../minecraft-dev-toolkit}/mcp/src/index.js"
+        "../minecraft-dev-toolkit/mcp/src/index.js"
       ]
     }
   }
