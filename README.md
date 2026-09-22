@@ -68,8 +68,9 @@ The first milestone is `0.1 — Instrumented Core`: a stable bootstrap, compatib
 
 ## Minecraft Dev Toolkit (development tooling only)
 
-Reny uses the shared Minecraft Dev Toolkit only for local development and
-OpenCode MCP tooling; it is not a runtime mod dependency.
+Reny uses the shared Minecraft Dev Toolkit only for local development and MCP tooling; it is not a runtime mod dependency. OpenCode and OMP are client configurations for the same shared `minecraft-dev` server and must not duplicate MCP/bridge implementation inside Reny.
+
+### OpenCode
 
 With sibling checkouts:
 
@@ -77,8 +78,22 @@ With sibling checkouts:
 node ../minecraft-dev-toolkit/bootstrap/src/cli.js --consumer .
 ```
 
-Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before
-running the same command. The bootstrap is project-local and needs no global
-OpenCode configuration. The Forge bridge and `reny/profiler` extension are not
-part of this slice; MCP configuration alone is not evidence of Forge runtime
-integration.
+Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before running the same command. The bootstrap is project-local and needs no global OpenCode configuration.
+
+### OMP
+
+OMP uses the project-local `.omp/mcp.json` definition and launches the same shared Toolkit entrypoint. The committed OMP-native config uses the canonical sibling checkout `../minecraft-dev-toolkit`; it does not rely on shell-style `${VAR:-default}` expansion in `args`. For a non-sibling local layout, use a non-versioned OMP user override rather than committing an absolute path.
+
+OpenCode and OMP configurations are independent contracts. OMP autodiscovery of `opencode.json` is not relied upon.
+
+From the repository root, reload and inspect the server with:
+
+```text
+/mcp reload
+/mcp list
+/mcp test minecraft-dev
+```
+
+No user-global OMP MCP registration is required.
+
+The Forge bridge and `reny/profiler` extension are not part of this tooling-bootstrap slice; MCP configuration alone is not evidence of Forge runtime integration.
