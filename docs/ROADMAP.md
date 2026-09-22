@@ -142,6 +142,8 @@ Reny should coexist with established render optimization projects until its own 
 
 ## Milestone 0.9 — Shader pipeline
 
+> **Boundary:** this milestone belongs to **Reny Optimization infrastructure** and is not the Reny Shaders shaderpack itself. Reny Shaders is a separate visual product that may consume or benefit from this infrastructure. See [Reny Shaders — Product and Rendering Vision](RENY_SHADERS_VISION.md).
+
 Goal: optimize the complete shader-heavy path.
 
 Areas:

@@ -4,6 +4,20 @@ Reny Optimization is an experimental performance project for **Minecraft 1.7.10 
 
 The project is intentionally measurement-driven: optimizations should be justified by profiling data and benchmarked before and after implementation.
 
+## Long-term vision
+
+Reny aims to become the **central optimization runtime for Minecraft Forge 1.7.10**: a system that can implement, coordinate, delegate, adapt, replace, or reject optimization capabilities according to profiling and compatibility evidence instead of blindly bundling or duplicating existing optimization mods.
+
+See [Optimization Runtime Vision](docs/OPTIMIZATION_RUNTIME_VISION.md) for the capability-first model and long-term provider strategy.
+
+## Related project: Reny Shaders
+
+**Reny Shaders** is the proposed performance-first visual renderer/shaderpack for **The Reawakening**. Its governing objective is to maximize **perceived visual quality per millisecond of GPU time**, using approximation, low-resolution work, reconstruction, and pack-aware rendering where these techniques provide better visual return for the cost.
+
+Its canonical pre-research direction — including the dark-fantasy art target, Lite/Default/Showcase profiles, project boundaries, agent rules, and open research questions — is documented in [Reny Shaders — Product and Rendering Vision](docs/RENY_SHADERS_VISION.md).
+
+Reny Shaders is related to Reny Optimization but is a separate product: the optimization runtime may provide efficient rendering infrastructure, while the shaderpack owns the intended image and visual-performance tradeoffs.
+
 ## Project goals
 
 - Improve frame-time consistency, especially P95/P99/P99.9 latency.
@@ -51,3 +65,20 @@ The project is intentionally measurement-driven: optimizations should be justifi
 **Pre-alpha / architecture bootstrap.**
 
 The first milestone is `0.1 — Instrumented Core`: a stable bootstrap, compatibility/patch registry, internal profiler, benchmark protocol, and diagnostic tooling. Large invasive optimizations come only after the baseline dataset exists.
+
+## Minecraft Dev Toolkit (development tooling only)
+
+Reny uses the shared Minecraft Dev Toolkit only for local development and
+OpenCode MCP tooling; it is not a runtime mod dependency.
+
+With sibling checkouts:
+
+```bash
+node ../minecraft-dev-toolkit/bootstrap/src/cli.js --consumer .
+```
+
+Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before
+running the same command. The bootstrap is project-local and needs no global
+OpenCode configuration. The Forge bridge and `reny/profiler` extension are not
+part of this slice; MCP configuration alone is not evidence of Forge runtime
+integration.
