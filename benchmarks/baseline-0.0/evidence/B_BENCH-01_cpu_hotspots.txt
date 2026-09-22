@@ -718,7 +718,7 @@ unknown_Java        : 7 (0.14%)
      2000000    0.02%        1  Compile::scratch_emit_size
      2000000    0.02%        1  Compile::shorten_branches
      2000000    0.02%        1  Assembler::emit_arith
-     2000000    0.02%        1  /home/pedro/Documents/curseforge/minecraft/Install/natives/forge-10.13.4.1614/liblwjgl64.so
+     2000000    0.02%        1  <minecraft-install>/natives/forge-10.13.4.1614/liblwjgl64.so
      2000000    0.02%        1  /usr/lib/x86_64-linux-gnu/libGLX.so.0.0.0
      2000000    0.02%        1  /usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-16.1.so
      2000000    0.02%        1  AbstractAssembler::bind
@@ -813,7 +813,7 @@ unknown_Java        : 7 (0.14%)
      2000000    0.02%        1  cpw.mods.fml.common.network.handshake.NetworkDispatcher.write
      2000000    0.02%        1  dev.reny.optimization.profiler.ProfilerCapture.recordTick
      2000000    0.02%        1  edge_order
-     2000000    0.02%        1  /home/pedro/Documents/curseforge/minecraft/Install/java/jre-legacy/lib/amd64/server/libjvm.so
+     2000000    0.02%        1  <minecraft-install>/java/jre-legacy/lib/amd64/server/libjvm.so
      2000000    0.02%        1  immFOper::constantF
      2000000    0.02%        1  immIOper::constant
      2000000    0.02%        1  io.netty.channel.DefaultChannelHandlerContext$17.run

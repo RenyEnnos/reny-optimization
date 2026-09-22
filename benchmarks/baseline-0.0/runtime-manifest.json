@@ -4,7 +4,7 @@
   "tested_commit_sha": "30d88b554addd4a610d6fe1efd319bda4b677635",
   "target": {
     "curseforge_instance": "Reny Optimization",
-    "path": "/home/pedro/Documents/curseforge/minecraft/Instances/Reny Optimization",
+    "path": "<benchmark-instance>",
     "minecraft": "1.7.10",
     "forge": "10.13.4.1614"
   },
@@ -51,7 +51,7 @@
     "C": {
       "id": "heavy-shaders-off",
       "profile": "benchmark-work/profiles/the-reawakening",
-      "source_instance": "/home/pedro/Documents/curseforge/minecraft/Instances/Forja Industrial 1710",
+      "source_instance": "<heavy-source-instance>",
       "source_git_commit": "c8e06abab9515473c1d54dbdebc3b9ae890b4686",
       "source_checkout_current_after_snapshot": "2dfadddcbe99e31a56eba8c57577eae745fe913a",
       "source_checkout_current_status_after_snapshot": "clean; not used as a launch target",
@@ -65,7 +65,7 @@
     "D": {
       "id": "heavy-shaders-on",
       "profile": "benchmark-work/profiles/the-reawakening",
-      "source_instance": "/home/pedro/Documents/curseforge/minecraft/Instances/Forja Industrial 1710",
+      "source_instance": "<heavy-source-instance>",
       "source_git_commit": "c8e06abab9515473c1d54dbdebc3b9ae890b4686",
       "source_checkout_current_after_snapshot": "2dfadddcbe99e31a56eba8c57577eae745fe913a",
       "source_checkout_current_status_after_snapshot": "clean; not used as a launch target",

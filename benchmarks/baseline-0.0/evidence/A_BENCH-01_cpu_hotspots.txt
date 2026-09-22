@@ -884,7 +884,7 @@ unknown_Java        : 18 (0.24%)
      2000000    0.01%        1  java.util.concurrent.atomic.AtomicBoolean.get
      2000000    0.01%        1  java.util.concurrent.locks.AbstractQueuedSynchronizer.addWaiter
      2000000    0.01%        1  java.util.concurrent.locks.AbstractQueuedSynchronizer.release
-     2000000    0.01%        1  /home/pedro/Documents/curseforge/minecraft/Install/natives/forge-10.13.4.1614/liblwjgl64.so
+     2000000    0.01%        1  <minecraft-install>/natives/forge-10.13.4.1614/liblwjgl64.so
      2000000    0.01%        1  dri_flush
      2000000    0.01%        1  fieldDescriptor::reinitialize
      2000000    0.01%        1  fill_window

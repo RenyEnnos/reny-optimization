@@ -4,7 +4,7 @@ The following bounded implementation issues have been formally created on GitHub
 to address the top bottlenecks confirmed by Issue #7 and supported by the
 representative CPU and GPU profiling evidence:
 
-## Issue #20 — [Instrument render/shader pass phases and optimize OpenGL pipeline overhead](https://github.com/pedroteste00000008-stack/reny-optimization/issues/20)
+## Issue #20 — [Instrument render/shader pass phases and optimize OpenGL pipeline overhead](https://github.com/RenyMineStudio/reny-optimization/issues/20)
 
 **Measured problem:** Shader-on rendering is the single largest frame-budget
 regressor. In minimal BENCH-01, frame P95 degrades from 4.21 ms to >52 ms with
@@ -31,7 +31,7 @@ Configurations A, B, C, D using the established 1280×720 protocol.
 
 ---
 
-## Issue #21 — [Attribute and optimize heavy-pack tick latency by subsystem (TileEntity, entity, and chunk lifecycle)](https://github.com/pedroteste00000008-stack/reny-optimization/issues/21)
+## Issue #21 — [Attribute and optimize heavy-pack tick latency by subsystem (TileEntity, entity, and chunk lifecycle)](https://github.com/RenyMineStudio/reny-optimization/issues/21)
 
 **Measured problem:** The heavy reference modpack (The Reawakening, 72 loaded FML
 mods) increases tick P95 across all canonical scenarios compared to the minimal
@@ -59,7 +59,7 @@ timings in exported summaries.
 
 ---
 
-## Issue #22 — [Correlate allocation rate and garbage collection pauses with frame/tick tail latency](https://github.com/pedroteste00000008-stack/reny-optimization/issues/22)
+## Issue #22 — [Correlate allocation rate and garbage collection pauses with frame/tick tail latency](https://github.com/RenyMineStudio/reny-optimization/issues/22)
 
 **Measured problem:** Heavy profile runs exhibit elevated garbage collection
 activity (up to 243 ms median GC time per 120-second measurement window, with

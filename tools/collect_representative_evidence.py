@@ -15,9 +15,10 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-sys.path.append(
-    "/home/pedro/Documents/curseforge/minecraft/Instances/Reny Optimization/benchmark-work/scripts"
+benchmark_workspace = Path(
+    os.environ.get("RENY_BENCHMARK_WORKSPACE", Path.cwd() / "benchmark-work")
 )
+sys.path.append(str(benchmark_workspace / "scripts"))
 import run_campaign
 from run_campaign import CampaignRunner, ROOT, TARGET, CONFIG_IDS, run_tool
 

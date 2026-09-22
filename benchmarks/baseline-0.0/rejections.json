@@ -34,7 +34,7 @@
   {
     "attempt_id": "attempt-1789256140050-A-BENCH-01",
     "configuration": "A",
-    "reason": "export directory missing: /home/pedro/Documents/curseforge/minecraft/Instances/Reny Optimization/benchmarks/results/BENCH-01/30d88b554addd4a610d6fe1efd319bda4b677635/run-1789256228800-ca308a48\n[18:40:08] [Server thread/INFO]: [CHAT] Reny benchmark COMPLETE: /home/pedro/Documents/curseforge/minecraft/Instances/Reny Optimization/benchmarks/results/BENCH-01/30d88b554addd4a610d6fe1efd319bda4b677635/run-1789256228800-ca308a48",
+    "reason": "export directory missing: <benchmark-instance>/benchmarks/results/BENCH-01/30d88b554addd4a610d6fe1efd319bda4b677635/run-1789256228800-ca308a48\n[18:40:08] [Server thread/INFO]: [CHAT] Reny benchmark COMPLETE: <benchmark-instance>/benchmarks/results/BENCH-01/30d88b554addd4a610d6fe1efd319bda4b677635/run-1789256228800-ca308a48",
     "result_dir": null,
     "run_id": null,
     "scenario": "BENCH-01"

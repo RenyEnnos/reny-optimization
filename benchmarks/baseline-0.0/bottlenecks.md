@@ -36,7 +36,7 @@ risk is **high** because the path crosses legacy Forge, OptiFine, and shaderpack
 **Recommended milestone / Follow-up issue.** Add phase/timer attribution for
 shader passes, chunk rebuild/upload, and render-thread work; evaluate OpenGL
 state caching and draw-call reduction. Tracked in implementation issue
-**#20** ([Instrument render/shader pass phases and optimize OpenGL pipeline overhead](https://github.com/pedroteste00000008-stack/reny-optimization/issues/20)).
+**#20** ([Instrument render/shader pass phases and optimize OpenGL pipeline overhead](https://github.com/RenyMineStudio/reny-optimization/issues/20)).
 
 ## 2. Heavy-pack tick and runtime workload — confirmed effect, subsystem unproven
 
@@ -62,7 +62,7 @@ complete local mod set and legacy integrations.
 streaming/generation, rebuild/upload, entity ticking, TileEntity ticking, Forge
 events, and lighting. Use the same saved heavy snapshot and require that section
 timings explain the tick/frame deltas before changing behavior. Tracked in implementation
-issue **#21** ([Attribute and optimize heavy-pack tick latency by subsystem](https://github.com/pedroteste00000008-stack/reny-optimization/issues/21)).
+issue **#21** ([Attribute and optimize heavy-pack tick latency by subsystem](https://github.com/RenyMineStudio/reny-optimization/issues/21)).
 
 ## 3. Allocation and GC pressure — confirmed signal, not yet a proven frame cause
 
@@ -83,7 +83,7 @@ high** for pooling or lifecycle changes in a legacy modded JVM.
 **Recommended milestone / Follow-up issue.** Add timestamp-aligned GC/allocation evidence or a
 safe representative external profile, then test only evidence-backed changes
 against frame and tick tails. Do not treat heap delta as allocation rate or add
-GC time to frame/tick time. Tracked in implementation issue **#22** ([Correlate allocation rate and garbage collection pauses with frame/tick tail latency](https://github.com/pedroteste00000008-stack/reny-optimization/issues/22)).
+GC time to frame/tick time. Tracked in implementation issue **#22** ([Correlate allocation rate and garbage collection pauses with frame/tick tail latency](https://github.com/RenyMineStudio/reny-optimization/issues/22)).
 
 ## Not ranked from this campaign
 
