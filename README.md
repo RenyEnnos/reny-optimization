@@ -65,3 +65,20 @@ Reny Shaders is related to Reny Optimization but is a separate product: the opti
 **Pre-alpha / architecture bootstrap.**
 
 The first milestone is `0.1 — Instrumented Core`: a stable bootstrap, compatibility/patch registry, internal profiler, benchmark protocol, and diagnostic tooling. Large invasive optimizations come only after the baseline dataset exists.
+
+## Minecraft Dev Toolkit (development tooling only)
+
+Reny uses the shared Minecraft Dev Toolkit only for local development and
+OpenCode MCP tooling; it is not a runtime mod dependency.
+
+With sibling checkouts:
+
+```bash
+node ../minecraft-dev-toolkit/bootstrap/src/cli.js --consumer .
+```
+
+Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before
+running the same command. The bootstrap is project-local and needs no global
+OpenCode configuration. The Forge bridge and `reny/profiler` extension are not
+part of this slice; MCP configuration alone is not evidence of Forge runtime
+integration.
