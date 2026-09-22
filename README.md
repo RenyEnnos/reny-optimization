@@ -68,8 +68,9 @@ The first milestone is `0.1 — Instrumented Core`: a stable bootstrap, compatib
 
 ## Minecraft Dev Toolkit (development tooling only)
 
-Reny uses the shared Minecraft Dev Toolkit only for local development and
-OpenCode MCP tooling; it is not a runtime mod dependency.
+Reny uses the shared Minecraft Dev Toolkit only for local development and MCP tooling; it is not a runtime mod dependency. OpenCode and OMP are client configurations for the same shared `minecraft-dev` server and must not duplicate MCP/bridge implementation inside Reny.
+
+### OpenCode
 
 With sibling checkouts:
 
@@ -77,8 +78,23 @@ With sibling checkouts:
 node ../minecraft-dev-toolkit/bootstrap/src/cli.js --consumer .
 ```
 
-Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before
-running the same command. The bootstrap is project-local and needs no global
-OpenCode configuration. The Forge bridge and `reny/profiler` extension are not
-part of this slice; MCP configuration alone is not evidence of Forge runtime
-integration.
+Or set `MINECRAFT_DEV_TOOLKIT_HOME` to an explicit Toolkit checkout before running the same command. The bootstrap is project-local and needs no global OpenCode configuration.
+
+### OMP
+
+OMP uses the project-local `.omp/mcp.json` definition. It launches the same shared Toolkit entrypoint and resolves it as:
+
+1. `MINECRAFT_DEV_TOOLKIT_HOME`, when set;
+2. otherwise the sibling checkout `../minecraft-dev-toolkit`.
+
+From the repository root, reload and inspect the server with:
+
+```text
+/mcp reload
+/mcp list
+/mcp test minecraft-dev
+```
+
+No user-global OMP MCP registration is required.
+
+The Forge bridge and `reny/profiler` extension are not part of this tooling-bootstrap slice; MCP configuration alone is not evidence of Forge runtime integration.
